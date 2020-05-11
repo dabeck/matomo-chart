@@ -11,6 +11,18 @@ matomoUsername:
 matomoPassword:
 matomoEmail:
 
+# Additional env vars
+# env:
+#   - name: "MATOMO_HOST"
+#     value: "127.0.0.1"
+#   - name: "MATOMO_WEBSITE_NAME"
+#     value: "example"
+#   - name: "MATOMO_WEBSITE_HOST"
+#     value: "https://example.com"
+#   - name: "MATOMO_ENABLE_PROXY_URI_HEADER"
+#     value: "no"
+
+
 service:
   type: ClusterIP
   port: 80

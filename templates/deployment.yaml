@@ -28,6 +28,10 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
+            {{- range .Values.env }}
+            - name: {{ .name }}
+              value: {{ .value }}
+            {{- end }}
             - name: MARIADB_HOST
               value: {{ .Values.mariadb.deployChart | ternary (printf "%s-mariadb" .Release.Name) .Values.mariadb.db.host }}
             - name: MARIADB_PORT_NUMBER
