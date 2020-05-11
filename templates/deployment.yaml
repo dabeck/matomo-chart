@@ -96,7 +96,7 @@ spec:
             httpGet:
               path: /piwik.php
               port: 80
-            initialDelaySeconds: 10
+            initialDelaySeconds: 60
             periodSeconds: 3
           readinessProbe:
             exec:
