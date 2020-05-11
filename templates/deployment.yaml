@@ -23,6 +23,11 @@ spec:
         - name: shared-data
           persistentVolumeClaim:
             claimName: {{ .Values.volumeClaim.existingClaim | default (include "matomo.fullname" .) }}
+        {{- if .Values.initScripts }}
+        - name: {{ .Values.initScripts.name }}
+          configMap:
+            name: {{ .Values.initScripts.name }}
+        {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -113,6 +118,10 @@ spec:
           volumeMounts:
             - mountPath: /bitnami
               name: shared-data
+            {{- if .Values.initScripts }}
+            - name: {{ .Values.initScripts.name }}
+              mountPath: /docker-entrypoint-init.d/
+            {{- end }}
 {{- include "matomo.imagePullSecrets" . | indent 6 }}
       {{- with .Values.nodeSelector }}
       nodeSelector:

@@ -22,6 +22,10 @@ matomoEmail:
 #   - name: "MATOMO_ENABLE_PROXY_URI_HEADER"
 #     value: "no"
 
+initScripts:
+  # Name of configMap that contains one or more init scripts.
+  # See: https://github.com/bitnami/bitnami-docker-matomo/blob/master/3/debian-10/rootfs/post-init.sh
+  name: init-scripts
 
 service:
   type: ClusterIP
