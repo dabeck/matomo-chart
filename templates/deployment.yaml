@@ -92,6 +92,24 @@ spec:
               protocol: TCP
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              path: /piwik.php
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 3
+          readinessProbe:
+            exec:
+              command:
+              - sh
+              - -c
+              - test "$(curl -f 127.0.0.1/piwik.php)"
+                = "This resource is part of Matomo. Keep full control of your data with the leading free and open source <a href='https://matomo.org' target='_blank' rel='noopener noreferrer nofollow'>web analytics & conversion optimisation platform</a>."
+            httpGet:
+              path: /piwik.php
+              port: 80
+            initialDelaySeconds: 30
+            periodSeconds: 3
           volumeMounts:
             - mountPath: /bitnami
               name: shared-data
