@@ -6,6 +6,6 @@ icon: "https://bitnami.com/assets/stacks/matomo/img/matomo-stack-110x117.png"
 version: 1.0.0-alpha3
 dependencies:
   - name: mariadb
-    version: 5.11.1
-    repository: https://kubernetes-charts.storage.googleapis.com
+    version: 9.2.5
+    repository: https://charts.bitnami.com/bitnami
     condition: mariadb.deployChart
