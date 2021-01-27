@@ -37,9 +37,9 @@ spec:
             - name: {{ .name }}
               value: {{ .value | quote }}
             {{- end }}
-            - name: MARIADB_HOST
+            - name: MATOMO_DATABASE_HOST
               value: {{ .Values.mariadb.deployChart | ternary (printf "%s-mariadb" .Release.Name) .Values.mariadb.auth.host }}
-            - name: MARIADB_PORT_NUMBER
+            - name: MATOMO_DATABASE_PORT_NUMBER
               value: !!string {{ .Values.mariadb.deployChart | ternary .Values.mariadb.primary.service.port .Values.mariadb.auth.port }}
             - name: MATOMO_DATABASE_NAME
               value: {{ .Values.mariadb.auth.database }}
