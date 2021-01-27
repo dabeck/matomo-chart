@@ -38,13 +38,13 @@ spec:
               value: {{ .value | quote }}
             {{- end }}
             - name: MARIADB_HOST
-              value: {{ .Values.mariadb.deployChart | ternary (printf "%s-mariadb" .Release.Name) .Values.mariadb.db.host }}
+              value: {{ .Values.mariadb.deployChart | ternary (printf "%s-mariadb" .Release.Name) .Values.mariadb.auth.host }}
             - name: MARIADB_PORT_NUMBER
-              value: !!string {{ .Values.mariadb.deployChart | ternary .Values.mariadb.service.port .Values.mariadb.db.port }}
+              value: !!string {{ .Values.mariadb.deployChart | ternary .Values.mariadb.primary.service.port .Values.mariadb.auth.port }}
             - name: MATOMO_DATABASE_NAME
-              value: {{ .Values.mariadb.db.name }}
+              value: {{ .Values.mariadb.auth.database }}
             - name: MATOMO_DATABASE_USER
-              value: {{ .Values.mariadb.db.user }}
+              value: {{ .Values.mariadb.auth.username }}
             - name: MATOMO_DATABASE_PASSWORD
               valueFrom:
                 secretKeyRef:
