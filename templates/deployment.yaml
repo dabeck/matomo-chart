@@ -1,5 +1,5 @@
 {{- define "mariadb.host" -}}
-{{- if .Values.mariadb.deployChart -}}
+{{- if not .Values.mariadb.deployChart -}}
 {{ .Values.mariadb.auth.host }}
 {{- else if eq .Values.mariadb.architecture "replication" -}}
 {{ printf "%s-mariadb-primary" (.Release.Name) }}
@@ -8,10 +8,10 @@
 {{- end }}
 {{- end }}
 {{- define "mariadb.port" -}}
-{{- if .Values.mariadb.deployChart -}}
-{{ .Values.mariadb.primary.service.port }}
-{{- else -}}
+{{- if not .Values.mariadb.deployChart -}}
 {{ .Values.mariadb.auth.port }}
+{{- else -}}
+{{ .Values.mariadb.primary.service.port }}
 {{- end }}
 {{- end }}
 apiVersion: apps/v1
