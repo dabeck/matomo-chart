@@ -1,16 +1,16 @@
 {{- define "mariadb.host" -}}
-{{- if .Values.mariadb.deployChart }}
+{{- if .Values.mariadb.deployChart -}}
 {{ .Values.mariadb.auth.host }}
-{{- else if eq .Values.mariadb.architecture "replication" }}
+{{- else if eq .Values.mariadb.architecture "replication" -}}
 {{ printf "%s-mariadb-primary" (.Release.Name) }}
-{{- else }}
+{{- else -}}
 {{ printf "%s-mariadb" (.Release.Name) }}
 {{- end }}
 {{- end }}
 {{- define "mariadb.port" -}}
-{{- if .Values.mariadb.deployChart }}
+{{- if .Values.mariadb.deployChart -}}
 {{ .Values.mariadb.primary.service.port }}
-{{- else}}
+{{- else -}}
 {{ .Values.mariadb.auth.port }}
 {{- end }}
 {{- end }}
