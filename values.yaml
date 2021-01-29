@@ -1,8 +1,9 @@
 replicaCount: 1
 
 image:
+  registry: docker.io
   repository: bitnami/matomo
-  tag: latest
+  tag: 4.1.1
   pullPolicy: IfNotPresent
 
 nameOverride: ""
@@ -43,6 +44,7 @@ ingress:
   #    hosts:
   #      - chart-example.local
 volumeClaim:
+  existingClaim: false
   # Reuse existing claim: (if empty, a new PVC will be created)
   accessModes:
     - ReadWriteOnce
@@ -70,30 +72,25 @@ affinity: {}
 
 mariadb:
   ## Switch to either deploy mariaDB as part of the chart, or use an external MariaDB instance :
-  ## (external mariadb requires mariadb.db.host and mariadb.db.port to be set)
+  ## (external mariadb requires mariadb.auth.host and mariadb.auth.port to be set)
   deployChart: true
-  db:
-    ## Database to create
-    ## ref: https://github.com/bitnami/bitnami-docker-mariadb#creating-a-database-on-first-run
-    ##
-    name: matomo_db
-    user: matomo_user
-    # password:
-    # Only used when internal MariaDB is disabled (mariadb.deployChart=false)
-    # host: mariadb.example.com
+  ## Chart:MariaDB 
+  ## ref: https://github.com/bitnami/charts/tree/master/bitnami/mariadb
+  auth:
+    ## Only used when internal MariaDB is disabled (mariadb.deployChart=false)
+    host: mariadb.example.com
     port: 3306
-  service:
-    port: 3306
-  replication:
-    enabled: false
-  master:
-    persistence:
+    database: matomo_db
+    username: matomo_user
+  primary:
+    persistence: &persitence
       size: 5Gi
-    config: |-
+    config: &config |-
       [mysqld]
       skip-name-resolve
       explicit_defaults_for_timestamp
       basedir=/opt/bitnami/mariadb
+      plugin_dir=/opt/bitnami/mariadb/plugin
       port=3306
       socket=/opt/bitnami/mariadb/tmp/mysql.sock
       tmpdir=/opt/bitnami/mariadb/tmp
@@ -107,7 +104,12 @@ mariadb:
       port=3306
       socket=/opt/bitnami/mariadb/tmp/mysql.sock
       default-character-set=UTF8
+      plugin_dir=/opt/bitnami/mariadb/plugin
       [manager]
       port=3306
       socket=/opt/bitnami/mariadb/tmp/mysql.sock
       pid-file=/opt/bitnami/mariadb/tmp/mysqld.pid
+  secondary:
+    persisitence: *persitence
+    config: *config
+    replicaCount: 0

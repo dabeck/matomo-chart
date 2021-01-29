@@ -1,3 +1,19 @@
+{{- define "mariadb.host" -}}
+{{- if not .Values.mariadb.deployChart -}}
+{{ .Values.mariadb.auth.host }}
+{{- else if eq .Values.mariadb.architecture "replication" -}}
+{{ printf "%s-mariadb-primary" (.Release.Name) }}
+{{- else -}}
+{{ printf "%s-mariadb" (.Release.Name) }}
+{{- end }}
+{{- end }}
+{{- define "mariadb.port" -}}
+{{- if not .Values.mariadb.deployChart -}}
+{{ .Values.mariadb.auth.port }}
+{{- else -}}
+{{ .Values.mariadb.primary.service.port }}
+{{- end }}
+{{- end }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -30,21 +46,21 @@ spec:
         {{- end }}
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
             {{- range .Values.env }}
             - name: {{ .name }}
               value: {{ .value | quote }}
             {{- end }}
-            - name: MARIADB_HOST
-              value: {{ .Values.mariadb.deployChart | ternary (printf "%s-mariadb" .Release.Name) .Values.mariadb.db.host }}
-            - name: MARIADB_PORT_NUMBER
-              value: !!string {{ .Values.mariadb.deployChart | ternary .Values.mariadb.service.port .Values.mariadb.db.port }}
+            - name: MATOMO_DATABASE_HOST
+              value: {{ include "mariadb.host" . }}
+            - name: MATOMO_DATABASE_PORT_NUMBER
+              value: !!string {{ include "mariadb.port" . }}
             - name: MATOMO_DATABASE_NAME
-              value: {{ .Values.mariadb.db.name }}
+              value: {{ .Values.mariadb.auth.database }}
             - name: MATOMO_DATABASE_USER
-              value: {{ .Values.mariadb.db.user }}
+              value: {{ .Values.mariadb.auth.username }}
             - name: MATOMO_DATABASE_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -93,14 +109,14 @@ spec:
           {{- end }}
           ports:
             - name: http
-              containerPort: 80
+              containerPort: 8080
               protocol: TCP
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           livenessProbe:
             httpGet:
               path: /piwik.php
-              port: 80
+              port: 8080
             initialDelaySeconds: 120
             periodSeconds: 3
           readinessProbe:
@@ -108,8 +124,7 @@ spec:
               command:
               - sh
               - -c
-              - test "$(curl -f 127.0.0.1/piwik.php)"
-                = "This resource is part of Matomo. Keep full control of your data with the leading free and open source <a href='https://matomo.org' target='_blank' rel='noopener noreferrer nofollow'>web analytics & conversion optimisation platform</a>."
+              - test "$(curl localhost:8080/piwik.php 2>/dev/null | tr -d '\n')" = "This resource is part of Matomo. Keep full control of your data with the leading free and open source <a href='https://matomo.org' target='_blank' rel='noopener noreferrer nofollow'>web analytics & conversion optimisation platform</a>.<br>This file is the endpoint for the Matomo tracking API. If you want to access the Matomo UI or use the Reporting API, please use <a href='index.php'>index.php</a> instead."
             initialDelaySeconds: 30
             periodSeconds: 3
           volumeMounts:
