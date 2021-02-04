@@ -70,6 +70,17 @@ nodeSelector: {}
 tolerations: []
 affinity: {}
 
+archiver:
+  enabled: false
+  schedule: "*/5 * * * *"
+  image:
+    registry: docker.io
+    repository: curlimages/curl
+    tag: latest
+    pullPolicy: IfNotPresent
+  tokenAuth: false
+
+
 mariadb:
   ## Switch to either deploy mariaDB as part of the chart, or use an external MariaDB instance :
   ## (external mariadb requires mariadb.auth.host and mariadb.auth.port to be set)

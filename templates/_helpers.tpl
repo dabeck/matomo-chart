@@ -57,3 +57,30 @@ imagePullSecrets:
 {{- end }}
 {{- end -}}
 {{- end -}}
+
+{{/*
+Create correct host port for maridb
+*/}}
+{{- define "mariadb.host" -}}
+{{- if not .Values.mariadb.deployChart -}}
+{{ .Values.mariadb.auth.host }}
+{{- else if eq .Values.mariadb.architecture "replication" -}}
+{{ printf "%s-mariadb-primary" (.Release.Name) }}
+{{- else -}}
+{{ printf "%s-mariadb" (.Release.Name) }}
+{{- end }}
+{{- end }}
+{{- define "mariadb.port" -}}
+{{- if not .Values.mariadb.deployChart -}}
+{{ .Values.mariadb.auth.port }}
+{{- else -}}
+{{ .Values.mariadb.primary.service.port }}
+{{- end }}
+{{- end }}
+
+{{/*
+Create correct url for request archive
+*/}}
+{{- define "matomo.archiver.url" -}}
+{{ printf "http://%s/misc/cron/archive.php?token_auth=$TOKEN_AUTH" (include "matomo.fullname" .) }}
+{{- end -}}
