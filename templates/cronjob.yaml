@@ -11,6 +11,7 @@ spec:
   schedule: "*/5 * * * *"
   jobTemplate:
     spec:
+      backoffLimit: 3
       template:
         metadata:
           labels:
@@ -31,6 +32,8 @@ spec:
                   secretKeyRef:
                     name: {{ include "matomo.fullname" . }}-archive
                     key: TOKEN_AUTH
+          restartPolicy: Never
+          terminationGracePeriodSeconds: 30
       {{- include "matomo.imagePullSecrets" . | indent 10 }}
 ---
 {{- if .Values.archiver.tokenAuth }}
