@@ -1,0 +1,65 @@
+{{- if .Values.archiver.enabled }}
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: {{ include "matomo.fullname" . }}-archive
+  labels:
+    app.kubernetes.io/name: {{ include "matomo.name" . }}
+    helm.sh/chart: {{ include "matomo.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  schedule: "*/5 * * * *"
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: {{ include "matomo.name" . }}-archive
+            app.kubernetes.io/instance: {{ .Release.Name }}
+        spec:
+          restartPolicy: Never
+          terminationGracePeriodSeconds: 5
+          volumes:
+            - name: shared-data
+              persistentVolumeClaim:
+                claimName: {{ .Values.volumeClaim.existingClaim | default (include "matomo.fullname" .) }}
+          containers:
+            - name: {{ .Chart.Name }}
+              image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+              imagePullPolicy: {{ .Values.image.pullPolicy }}
+              command:
+              - /bin/bash
+              args:
+              - -c
+              - |
+                head -n -1 /opt/bitnami/scripts/matomo/entrypoint.sh > /tmp/matomo-entrypoint.sh
+                chmod +x /tmp/matomo-entrypoint.sh
+                /tmp/matomo-entrypoint.sh /opt/bitnami/scripts/matomo/run.sh;
+                php /opt/bitnami/matomo/console --matomo-domain={{ include "matomo.archiver.domain" . }} core:archive 
+              env:
+                {{- range .Values.env }}
+                - name: {{ .name }}
+                  value: {{ .value | quote }}
+                {{- end }}
+                - name: MATOMO_DATABASE_HOST
+                  value: {{ include "mariadb.host" . }}
+                - name: MATOMO_DATABASE_PORT_NUMBER
+                  value: !!string {{ include "mariadb.port" . }}
+                - name: MATOMO_DATABASE_NAME
+                  value: {{ .Values.mariadb.auth.database }}
+                - name: MATOMO_DATABASE_USER
+                  value: {{ .Values.mariadb.auth.username }}
+                - name: MATOMO_DATABASE_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ .Values.mariadb.deployChart | ternary (include "matomo.mariasecret" .) (include "matomo.fullname" .) }}
+                      key: mariadb-password
+              resources:
+                {{- toYaml ((empty .Values.archiver.resources) | ternary (.Values.resource) (.Values.archiver.resources)) | nindent 16 }}
+              volumeMounts:
+                - mountPath: /bitnami
+                  name: shared-data
+          {{- include "matomo.imagePullSecrets" . | indent 10 }}
+{{- end }}

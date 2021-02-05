@@ -70,6 +70,13 @@ nodeSelector: {}
 tolerations: []
 affinity: {}
 
+archiver:
+  enabled: true
+  schedule: "*/5 * * * *"
+  domain: ""
+  resources: {}
+
+
 mariadb:
   ## Switch to either deploy mariaDB as part of the chart, or use an external MariaDB instance :
   ## (external mariadb requires mariadb.auth.host and mariadb.auth.port to be set)

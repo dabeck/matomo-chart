@@ -57,3 +57,38 @@ imagePullSecrets:
 {{- end }}
 {{- end -}}
 {{- end -}}
+
+{{/*
+Create correct host port for maridb
+*/}}
+{{- define "mariadb.host" -}}
+{{- if not .Values.mariadb.deployChart -}}
+{{ .Values.mariadb.auth.host }}
+{{- else if eq .Values.mariadb.architecture "replication" -}}
+{{ printf "%s-mariadb-primary" (.Release.Name) }}
+{{- else -}}
+{{ printf "%s-mariadb" (.Release.Name) }}
+{{- end }}
+{{- end }}
+{{- define "mariadb.port" -}}
+{{- if not .Values.mariadb.deployChart -}}
+{{ .Values.mariadb.auth.port }}
+{{- else -}}
+{{ .Values.mariadb.primary.service.port }}
+{{- end }}
+{{- end }}
+
+{{/*
+Set archiver domain based on first ingres host or value
+*/}}
+{{- define "matomo.archiver.domain" -}}
+{{- if not (empty .Values.archiver.domain) }}
+{{- .Values.archiver.domain -}}
+{{- else if (not (empty .Values.ingress.hosts)) -}}
+{{- if  (not (empty (first .Values.ingress.hosts))) -}}
+{{- first .Values.ingress.hosts -}}
+{{- end }}
+{{- else -}}
+{{ required (printf "You must set an ingress.host or an archiver.domain to run external archiver") nil }}
+{{- end }}
+{{- end }}
