@@ -9,7 +9,7 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
 spec:
-  schedule: "*/5 * * * *"
+  schedule: {{ default "*/30 * * * *"  .Values.archiver.schedule | quote }}
   jobTemplate:
     spec:
       backoffLimit: 1

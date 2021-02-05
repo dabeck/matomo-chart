@@ -72,7 +72,7 @@ affinity: {}
 
 archiver:
   enabled: false
-  schedule: "*/5 * * * *"
+  schedule: "*/30 * * * *" 
   annotations:  {}
   domain: ""
   resources: {}
