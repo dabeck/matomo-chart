@@ -1,3 +1,4 @@
+{{- if .Values.archiver.enabled }}
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
@@ -11,42 +12,54 @@ spec:
   schedule: "*/5 * * * *"
   jobTemplate:
     spec:
-      backoffLimit: 3
+      backoffLimit: 1
       template:
         metadata:
           labels:
             app.kubernetes.io/name: {{ include "matomo.name" . }}-archive
             app.kubernetes.io/instance: {{ .Release.Name }}
         spec:
+          restartPolicy: Never
+          terminationGracePeriodSeconds: 5
+          volumes:
+            - name: shared-data
+              persistentVolumeClaim:
+                claimName: {{ .Values.volumeClaim.existingClaim | default (include "matomo.fullname" .) }}
           containers:
             - name: {{ .Chart.Name }}
-              image: "{{ .Values.archiver.image.registry }}/{{ .Values.archiver.image.repository }}:{{ .Values.archiver.image.tag }}"
+              image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}"
               imagePullPolicy: {{ .Values.image.pullPolicy }}
-              resources:
-                {{- toYaml .Values.resources | nindent 16 }}
-              args: 
-              - {{ (include "matomo.archiver.url" .) }}
+              command:
+              - /bin/bash
+              args:
+              - -c
+              - |
+                head -n -1 /opt/bitnami/scripts/matomo/entrypoint.sh > /tmp/matomo-entrypoint.sh
+                chmod +x /tmp/matomo-entrypoint.sh
+                /tmp/matomo-entrypoint.sh /opt/bitnami/scripts/matomo/run.sh;
+                php /opt/bitnami/matomo/console --matomo-domain=analytics.minikube.local core:archive
               env:
-              - name: TOKEN_AUTH
-                valueFrom:
-                  secretKeyRef:
-                    name: {{ include "matomo.fullname" . }}-archive
-                    key: TOKEN_AUTH
-          restartPolicy: Never
-          terminationGracePeriodSeconds: 30
-      {{- include "matomo.imagePullSecrets" . | indent 10 }}
----
-{{- if .Values.archiver.tokenAuth }}
-apiVersion: v1
-kind: Secret
-type: Opaque
-metadata:
-  name: {{ include "matomo.fullname" . }}-archive
-  labels:
-    app.kubernetes.io/name: {{ include "matomo.name" . }}
-    helm.sh/chart: {{ include "matomo.chart" . }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-data:
-  TOKEN_AUTH:  {{ .Values.archiver.tokenAuth | b64enc | quote }}
+                {{- range .Values.env }}
+                - name: {{ .name }}
+                  value: {{ .value | quote }}
+                {{- end }}
+                - name: MATOMO_DATABASE_HOST
+                  value: {{ include "mariadb.host" . }}
+                - name: MATOMO_DATABASE_PORT_NUMBER
+                  value: !!string {{ include "mariadb.port" . }}
+                - name: MATOMO_DATABASE_NAME
+                  value: {{ .Values.mariadb.auth.database }}
+                - name: MATOMO_DATABASE_USER
+                  value: {{ .Values.mariadb.auth.username }}
+                - name: MATOMO_DATABASE_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ .Values.mariadb.deployChart | ternary (include "matomo.mariasecret" .) (include "matomo.fullname" .) }}
+                      key: mariadb-password
+              resources:
+                {{- toYaml ((empty .Values.archiver.resources) | ternary (.Values.resource) (.Values.archiver.resources)) | nindent 16 }}
+              volumeMounts:
+                - mountPath: /bitnami
+                  name: shared-data
+          {{- include "matomo.imagePullSecrets" . | indent 10 }}
 {{- end }}
-

@@ -71,14 +71,9 @@ tolerations: []
 affinity: {}
 
 archiver:
-  enabled: false
+  enabled: true
   schedule: "*/5 * * * *"
-  image:
-    registry: docker.io
-    repository: curlimages/curl
-    tag: latest
-    pullPolicy: IfNotPresent
-  tokenAuth: false
+  resources: {}
 
 
 mariadb:

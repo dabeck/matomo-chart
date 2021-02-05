@@ -77,10 +77,3 @@ Create correct host port for maridb
 {{ .Values.mariadb.primary.service.port }}
 {{- end }}
 {{- end }}
-
-{{/*
-Create correct url for request archive
-*/}}
-{{- define "matomo.archiver.url" -}}
-{{ printf "http://%s/misc/cron/archive.php?token_auth=$TOKEN_AUTH" (include "matomo.fullname" .) }}
-{{- end -}}
