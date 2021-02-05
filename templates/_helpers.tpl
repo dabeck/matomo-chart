@@ -77,3 +77,18 @@ Create correct host port for maridb
 {{ .Values.mariadb.primary.service.port }}
 {{- end }}
 {{- end }}
+
+{{/*
+Set archiver domain based on first ingres host or value
+*/}}
+{{- define "matomo.archiver.domain" -}}
+{{- if not (empty .Values.archiver.domain) }}
+{{- .Values.archiver.domain -}}
+{{- else if (not (empty .Values.ingress.hosts)) -}}
+{{- if  (not (empty (first .Values.ingress.hosts))) -}}
+{{- first .Values.ingress.hosts -}}
+{{- end }}
+{{- else -}}
+{{ required (printf "You must set an ingress.host or an archiver.domain to run external archiver") nil }}
+{{- end }}
+{{- end }}

@@ -73,6 +73,7 @@ affinity: {}
 archiver:
   enabled: true
   schedule: "*/5 * * * *"
+  domain: ""
   resources: {}
 
 
