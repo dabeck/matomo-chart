@@ -71,8 +71,9 @@ tolerations: []
 affinity: {}
 
 archiver:
-  enabled: true
+  enabled: false
   schedule: "*/5 * * * *"
+  annotations:  {}
   domain: ""
   resources: {}
 

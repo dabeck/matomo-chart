@@ -15,6 +15,12 @@ spec:
       backoffLimit: 1
       template:
         metadata:
+          {{- with .Values.archiver.annotations }}
+          annotations:
+            {{- range $key, $value := . }}
+            {{ $key }}: {{ $value | quote }}
+            {{- end }}
+          {{- end }}
           labels:
             app.kubernetes.io/name: {{ include "matomo.name" . }}-archive
             app.kubernetes.io/instance: {{ .Release.Name }}
