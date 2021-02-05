@@ -3,7 +3,7 @@ appVersion: "1.0"
 description: Matomo helm chart
 name: matomo
 icon: "https://bitnami.com/assets/stacks/matomo/img/matomo-stack-110x117.png"
-version: 1.0.1-alpha4.1
+version: 1.0.2-alpha4.1
 dependencies:
   - name: mariadb
     version: 9.2.5
