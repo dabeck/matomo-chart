@@ -3,7 +3,7 @@ replicaCount: 1
 image:
   registry: docker.io
   repository: bitnami/matomo
-  tag: 4.1.1
+  tag: 4.2.1
   pullPolicy: IfNotPresent
 
 nameOverride: ""
