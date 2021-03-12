@@ -28,6 +28,13 @@ initScripts:
   # See: https://github.com/bitnami/bitnami-docker-matomo/blob/master/3/debian-10/rootfs/post-init.sh
   name: init-scripts
 
+# define custom command for the matomo container
+command: []
+
+# define args for the matomo container
+args: [] 
+
+
 service:
   type: ClusterIP
   port: 80
