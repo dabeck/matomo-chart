@@ -31,10 +31,12 @@ spec:
       containers:
         - name: {{ .Chart.Name }}
           {{- if .Values.command }}
-          command: {{ .Values.command }}
+          command: 
+          {{- toYaml .Values.command | nindent 12 }}
           {{- end }}
           {{- if .Values.args }}
-          args: {{ .Values.args }}
+          args: 
+          {{- toYaml .Values.args | nindent 12  }}
           {{- end }}
           image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
