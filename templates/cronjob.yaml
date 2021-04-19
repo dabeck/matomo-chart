@@ -44,7 +44,7 @@ spec:
                 head -n -1 /opt/bitnami/scripts/matomo/entrypoint.sh > /tmp/matomo-entrypoint.sh
                 chmod +x /tmp/matomo-entrypoint.sh
                 /tmp/matomo-entrypoint.sh /opt/bitnami/scripts/matomo/run.sh;
-                php /opt/bitnami/matomo/console --matomo-domain={{ include "matomo.archiver.domain" . }} core:archive 
+                php /opt/bitnami/matomo/console --matomo-domain={{ include "matomo.archiver.domain" . }} core:archive {{ include "matomo.archiver.args" . }}
               env:
                 {{- range .Values.env }}
                 - name: {{ .name }}
