@@ -92,3 +92,12 @@ Set archiver domain based on first ingres host or value
 {{ required (printf "You must set an ingress.host or an archiver.domain to run external archiver") nil }}
 {{- end }}
 {{- end }}
+
+{{/*
+Set extra arguments for archiver
+*/}}
+{{- define "matomo.archiver.args" -}}
+{{- if not (empty .Values.archiver.args) }}
+{{- range .Values.archiver.args }}{{ . }} {{ end }}
+{{- end}}
+{{- end }}
